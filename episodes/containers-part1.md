@@ -232,24 +232,32 @@ permission denied while trying to connect to the Docker daemon socket at unix://
 on": dial unix /var/run/docker.sock: connect: permission denied
 ```
 
-The reason this happens is that the docker program requires Administrator-level 
-authorization to run. If the user does not have that level of access by 
-default, the command above will be denied. We can get around this by adding the 
-command `sudo` right before each call to `docker`. So, if you received the 
-"permission denied" error, update the command to 
+The reason this happens is that your Linux user is not added to the `docker`
+group, which grants the necessary permissions to access the Unix socket without using `sudo`.
+Run the following commands to add your user to the `docker` group:
+
+1. Ensure the `docker` group exists (just for safety)
 
 ```
-sudo docker pull easypi/openrefine
+sudo groupadd docker
 ```
 
-And press "Enter" to run the command. You will likely be asked for the user 
+You will likely be asked for the user 
 password. If you are running this in a virtual machine, it will be the same 
 password you used to log in to the virtual machine. If you are running this on 
-your own machine, you would use the password for your user account. Note for 
-the remainder of this lesson, note you will _always_ need to add the `sudo` 
-part whenever you call the `docker` command. There is another way to allow 
-access to Docker commands without requiring the use of `sudo` and you can read 
-about them at [https://docs.docker.com/engine/install/linux-postinstall/](https://docs.docker.com/engine/install/linux-postinstall/).
+your own machine, you would use the password for your user account.
+
+2. Append (`-a`) your current user (`$USER`) to the group (`-G`) `docker` using the `usermod` command.
+
+```
+sudo usermod -aG docker $USER
+```
+
+3. Activate the group changes usidn `newgrp`
+
+```
+newgrp docker
+```
 
 :::::::::::::::::::::::::::::::::::::::::::
 
